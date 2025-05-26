@@ -1,1 +1,357 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kenangan Romantis Kita</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Custom CSS untuk font dan animasi */
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(to right bottom, #fbcfe8, #fce7f3); /* Soft pink gradient */
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
 
+        .card-transition {
+            transition: all 0.3s ease-in-out;
+        }
+
+        .card-transition:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Classes for page transitions */
+        /* page-hidden ensures the element is completely out of the layout flow */
+        .page-hidden {
+            display: none;
+        }
+
+        /* page-transition-out for elements transitioning out (fading and moving) */
+        .page-transition-out {
+            opacity: 0;
+            transform: translateY(20px);
+            pointer-events: none; /* Allow clicks to pass through during transition */
+            transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+        }
+
+        /* page-transition-in for elements transitioning in (fading and moving) */
+        .page-transition-in {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: all;
+            transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+        }
+
+        .fullscreen-modal-transition {
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        .fullscreen-modal-hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .fullscreen-modal-visible {
+            opacity: 1;
+            pointer-events: all;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-pink-100 to-purple-100 min-h-screen flex flex-col items-center justify-center p-4">
+
+    <audio id="background-music" autoplay loop volume="0.5">
+        <source src="https://www.w3schools.com/html/horse.mp3" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
+
+    <header class="text-center mb-12 mt-8">
+        <h1 class="text-5xl md:text-6xl font-extrabold text-pink-700 drop-shadow-lg animate-pulse">
+            Kenangan Romantis Kita
+        </h1>
+        <p class="text-xl md:text-2xl text-purple-600 mt-4">
+            Setiap momen bersamamu adalah harta yang tak ternilai.
+        </p>
+    </header>
+
+    <div id="memory-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 p-8 w-full max-w-6xl page-transition-in">
+        </div>
+
+    <div id="memory-detail" class="fixed inset-0 bg-white bg-opacity-95 backdrop-blur-sm p-8 z-40 overflow-y-auto page-transition-out page-hidden flex flex-col items-center pt-20">
+        <div class="w-full max-w-4xl">
+            <button id="back-button" class="mb-8 bg-pink-500 hover:bg-pink-600 text-white font-bold py-3 px-6 rounded-full transition duration-300 ease-in-out transform hover:scale-105 shadow-md">
+                &larr; Kembali
+            </button>
+            <h2 id="detail-title" class="text-4xl md:text-5xl font-bold text-pink-700 mb-4 text-center"></h2>
+            <p id="detail-date" class="text-lg md:text-xl text-gray-600 mb-6 text-center"></p>
+            <p id="detail-description" class="text-xl md:text-2xl text-gray-800 mb-10 leading-relaxed text-center"></p>
+
+            <div id="detail-gallery" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                </div>
+        </div>
+    </div>
+
+    <div id="fullscreen-modal" class="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center p-4 z-50 fullscreen-modal-hidden fullscreen-modal-transition">
+        <img id="fullscreen-image" src="" alt="Full Screen Image" class="max-w-full max-h-full object-contain rounded-lg shadow-2xl hidden">
+        <video id="fullscreen-video" src="" controls class="max-w-full max-h-full object-contain rounded-lg shadow-2xl hidden"></video>
+        <button id="close-modal" class="absolute top-4 right-4 text-white text-5xl font-bold leading-none p-2 rounded-full bg-gray-800 bg-opacity-50 hover:bg-opacity-75 transition-all duration-200">&times;</button>
+    </div>
+
+    <script>
+        // Data kenangan romantis
+        // Anda bisa mengganti URL gambar dan video dengan file lokal Anda sendiri
+        // Contoh: "images/kencan_pertama.jpg" atau "videos/piknik_senja.mp4"
+        const memories = [
+            {
+                id: 1,
+                date: "15 Januari 2023",
+                title: "Kencan Pertama Kita",
+                shortDescription: "Malam yang tak terlupakan di kafe sudut kota, di mana kita pertama kali menyadari ada sesuatu yang istimewa...",
+                fullDescription: "Malam yang tak terlupakan di kafe sudut kota, di mana kita pertama kali menyadari ada sesuatu yang istimewa di antara kita. Obrolan kita mengalir begitu saja, dan senyummu membuat hatiku berdebar. Itu adalah awal dari segalanya, dan aku tak akan pernah melupakannya.",
+                thumbnail: "https://placehold.co/400x300/FFD1DC/663399?text=Kencan+Pertama",
+                gallery: [
+                    { type: "image", src: "https://placehold.co/800x600/FFD1DC/663399?text=Foto+Kencan+1" },
+                    { type: "image", src: "https://placehold.co/800x600/FFD1DC/663399?text=Foto+Kencan+2" },
+                    { type: "video", src: "https://www.w3schools.com/html/mov_bbb.mp4" } // Contoh video, ganti dengan video Anda
+                ]
+            },
+            {
+                id: 2,
+                date: "14 Februari 2023",
+                title: "Valentine Pertama Bersamamu",
+                shortDescription: "Hari kasih sayang yang penuh kejutan dan tawa. Kamu membuat hari itu begitu spesial...",
+                fullDescription: "Hari kasih sayang yang penuh kejutan dan tawa. Kamu membuat hari itu begitu spesial dengan hadiah buatan tanganmu dan makan malam romantis yang kita siapkan bersama. Setiap detik bersamamu adalah anugerah.",
+                thumbnail: "https://placehold.co/400x300/FEE2E2/EF4444?text=Valentine+Pertama",
+                gallery: [
+                    { type: "image", src: "https://placehold.co/800x600/FEE2E2/EF4444?text=Foto+Valentine+1" },
+                    { type: "image", src: "https://placehold.co/800x600/FEE2E2/EF4444?text=Foto+Valentine+2" }
+                ]
+            },
+            {
+                id: 3,
+                date: "20 Mei 2023",
+                title: "Piknik Senja di Bukit",
+                shortDescription: "Melihat matahari terbenam bersamamu dari puncak bukit. Langit berubah menjadi kanvas warna...",
+                fullDescription: "Melihat matahari terbenam bersamamu dari puncak bukit. Langit berubah menjadi kanvas warna-warni yang indah, dan aku merasa dunia berhenti berputar. Hanya ada kita berdua, dan keindahan alam yang tak terlukiskan.",
+                thumbnail: "https://placehold.co/400x300/DBCFE8/9333EA?text=Piknik+Senja",
+                gallery: [
+                    { type: "image", src: "https://placehold.co/800x600/DBCFE8/9333EA?text=Foto+Piknik+1" },
+                    { type: "image", src: "https://placehold.co/800x600/DBCFE8/9333EA?text=Foto+Piknik+2" },
+                    { type: "image", src: "https://placehold.co/800x600/DBCFE8/9333EA?text=Foto+Piknik+3" }
+                ]
+            },
+            {
+                id: 4,
+                date: "08 Juli 2023",
+                title: "Liburan Musim Panas",
+                shortDescription: "Petualangan kita di pantai yang indah. Bermain ombak dan membangun istana pasir...",
+                fullDescription: "Petualangan kita di pantai yang indah. Bermain ombak, membangun istana pasir, dan menikmati hidangan laut segar. Setiap tawa dan setiap sentuhan pasir di kaki adalah kenangan yang akan selalu ku simpan.",
+                thumbnail: "https://placehold.co/400x300/BFDBFE/2563EB?text=Liburan+Pantai",
+                gallery: [
+                    { type: "image", src: "https://placehold.co/800x600/BFDBFE/2563EB?text=Foto+Pantai+1" },
+                    { type: "image", src: "https://placehold.co/800x600/BFDBFE/2563EB?text=Foto+Pantai+2" },
+                    { type: "video", src: "https://www.w3schools.com/html/movie.mp4" } // Contoh video, ganti dengan video Anda
+                ]
+            },
+            {
+                id: 5,
+                date: "10 November 2023",
+                title: "Konser Favorit Kita",
+                shortDescription: "Menari dan bernyanyi bersama di konser band favorit kita. Energi yang luar biasa...",
+                fullDescription: "Menari dan bernyanyi bersama di konser band favorit kita. Energi yang luar biasa, suara musik yang menggelegar, dan kamu di sampingku. Itu adalah malam yang sempurna untuk melupakan segalanya dan hanya menikmati momen.",
+                thumbnail: "https://placehold.co/400x300/E9D5FF/A78BFA?text=Konser+Musik",
+                gallery: [
+                    { type: "image", src: "https://placehold.co/800x600/E9D5FF/A78BFA?text=Foto+Konser+1" },
+                    { type: "image", src: "https://placehold.co/800x600/E9D5FF/A78BFA?text=Foto+Konser+2" }
+                ]
+            }
+        ];
+
+        // Dapatkan elemen-elemen DOM yang dibutuhkan
+        const memoryGrid = document.getElementById('memory-grid');
+        const memoryDetail = document.getElementById('memory-detail');
+        const backButton = document.getElementById('back-button');
+        const detailTitle = document.getElementById('detail-title');
+        const detailDate = document.getElementById('detail-date');
+        const detailDescription = document.getElementById('detail-description');
+        const detailGallery = document.getElementById('detail-gallery');
+        const fullscreenModal = document.getElementById('fullscreen-modal');
+        const fullscreenImage = document.getElementById('fullscreen-image');
+        const fullscreenVideo = document.getElementById('fullscreen-video');
+        const closeModalButton = document.getElementById('close-modal');
+
+        /**
+         * Fungsi untuk menampilkan daftar kenangan di halaman utama.
+         */
+        function renderMemoryGrid() {
+            memoryGrid.innerHTML = ''; // Bersihkan grid sebelum merender ulang
+            memories.forEach(memory => {
+                const memoryCard = document.createElement('div');
+                memoryCard.id = `memory-card-${memory.id}`;
+                memoryCard.className = `
+                    bg-white rounded-xl shadow-lg overflow-hidden cursor-pointer
+                    transform hover:scale-105 transition-all duration-300 ease-in-out
+                    p-6 flex flex-col items-center text-center
+                `;
+                memoryCard.innerHTML = `
+                    <img src="${memory.thumbnail}" alt="${memory.title}" class="w-full h-48 object-cover rounded-lg mb-4 shadow-md">
+                    <h3 class="text-2xl font-semibold text-pink-600 mb-2">${memory.title}</h3>
+                    <p class="text-gray-500 text-sm mb-2">${memory.date}</p>
+                    <p class="text-gray-700 text-base mb-4">${memory.shortDescription}</p>
+                    <button class="mt-auto bg-pink-400 hover:bg-pink-500 text-white font-bold py-2 px-4 rounded-full transition duration-300 ease-in-out shadow-sm">
+                        Lihat Detail
+                    </button>
+                `;
+                memoryCard.addEventListener('click', () => showMemoryDetail(memory.id));
+                memoryGrid.appendChild(memoryCard);
+            });
+        }
+
+        /**
+         * Fungsi untuk menampilkan detail kenangan tertentu.
+         * @param {number} id - ID kenangan yang akan ditampilkan.
+         */
+        function showMemoryDetail(id) {
+            const memory = memories.find(m => m.id === id);
+            if (!memory) return;
+
+            detailTitle.textContent = memory.title;
+            detailDate.textContent = memory.date;
+            detailDescription.textContent = memory.fullDescription;
+            detailGallery.innerHTML = ''; // Bersihkan galeri
+
+            // Render item galeri (foto/video)
+            memory.gallery.forEach(item => {
+                const galleryItem = document.createElement('div');
+                galleryItem.className = `
+                    relative w-full h-64 overflow-hidden rounded-lg shadow-lg cursor-pointer
+                    transform hover:scale-105 transition-transform duration-300 ease-in-out
+                `;
+
+                if (item.type === 'image') {
+                    galleryItem.innerHTML = `
+                        <img src="${item.src}" alt="Galeri ${memory.title}" class="w-full h-full object-cover rounded-lg">
+                        <div class="absolute inset-0 bg-black bg-opacity-20 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity duration-300">
+                            <span class="text-white text-3xl font-bold">+</span>
+                        </div>
+                    `;
+                    galleryItem.addEventListener('click', () => showFullscreen(item.src, 'image'));
+                } else if (item.type === 'video') {
+                    galleryItem.innerHTML = `
+                        <video src="${item.src}" controls class="w-full h-full object-cover rounded-lg"></video>
+                        <div class="absolute inset-0 bg-black bg-opacity-20 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity duration-300">
+                            <span class="text-white text-3xl font-bold">&#9658;</span> </div>
+                    `;
+                    galleryItem.addEventListener('click', () => showFullscreen(item.src, 'video'));
+                }
+                detailGallery.appendChild(galleryItem);
+            });
+
+            // Make sure the detail page is not hidden by `display: none` before starting the transition
+            memoryDetail.classList.remove('page-hidden');
+            // Force reflow to ensure the browser applies 'display: block' before starting opacity transition
+            void memoryDetail.offsetWidth;
+
+            // Transition out for the memory grid
+            memoryGrid.classList.remove('page-transition-in');
+            memoryGrid.classList.add('page-transition-out');
+
+            // Transition in for the memory detail
+            memoryDetail.classList.remove('page-transition-out');
+            memoryDetail.classList.add('page-transition-in');
+
+            // Hide the grid completely after its transition is finished
+            setTimeout(() => {
+                memoryGrid.classList.add('page-hidden');
+            }, 500); // Match with CSS transition duration
+        }
+
+        /**
+         * Fungsi untuk kembali ke halaman daftar kenangan.
+         */
+        function goBackToGrid() {
+            // Make sure the memory grid is not hidden by `display: none` before starting the transition
+            memoryGrid.classList.remove('page-hidden');
+            // Force reflow
+            void memoryGrid.offsetWidth;
+
+            // Transition out for the memory detail
+            memoryDetail.classList.remove('page-transition-in');
+            memoryDetail.classList.add('page-transition-out');
+
+            // Transition in for the memory grid
+            memoryGrid.classList.remove('page-transition-out');
+            memoryGrid.classList.add('page-transition-in');
+
+            // Hide the detail page completely after its transition is finished
+            setTimeout(() => {
+                memoryDetail.classList.add('page-hidden');
+            }, 500); // Match with CSS transition duration
+        }
+
+        /**
+         * Fungsi untuk menampilkan foto atau video dalam mode layar penuh.
+         * @param {string} src - URL sumber media.
+         * @param {string} type - Tipe media ('image' atau 'video').
+         */
+        function showFullscreen(src, type) {
+            fullscreenImage.classList.add('hidden');
+            fullscreenVideo.classList.add('hidden');
+
+            if (type === 'image') {
+                fullscreenImage.src = src;
+                fullscreenImage.classList.remove('hidden');
+            } else if (type === 'video') {
+                fullscreenVideo.src = src;
+                fullscreenVideo.classList.remove('hidden');
+                fullscreenVideo.play(); // Putar video secara otomatis
+            }
+
+            fullscreenModal.classList.remove('fullscreen-modal-hidden');
+            fullscreenModal.classList.add('fullscreen-modal-visible');
+        }
+
+        /**
+         * Fungsi untuk menyembunyikan modal layar penuh.
+         */
+        function closeFullscreen() {
+            fullscreenModal.classList.remove('fullscreen-modal-visible');
+            fullscreenModal.classList.add('fullscreen-modal-hidden');
+            fullscreenVideo.pause(); // Hentikan video saat modal ditutup
+            fullscreenVideo.currentTime = 0; // Reset waktu video
+        }
+
+        // Event Listeners
+        backButton.addEventListener('click', goBackToGrid);
+        closeModalButton.addEventListener('click', closeFullscreen);
+        fullscreenModal.addEventListener('click', (e) => {
+            // Tutup modal jika mengklik area di luar gambar/video
+            if (e.target === fullscreenModal) {
+                closeFullscreen();
+            }
+        });
+
+        // Inisialisasi: Render grid kenangan saat halaman dimuat
+        document.addEventListener('DOMContentLoaded', renderMemoryGrid);
+
+        // Play background music on user interaction (to bypass autoplay policies)
+        // This is a common workaround for browser autoplay restrictions.
+        // The music will try to autoplay, but if blocked, it will play on the first user interaction.
+        document.addEventListener('click', () => {
+            const music = document.getElementById('background-music');
+            if (music.paused) {
+                music.play().catch(error => {
+                    console.log("Autoplay was prevented. User interaction needed to play music.", error);
+                });
+            }
+        }, { once: true }); // Only trigger this listener once
+    </script>
+</body>
+</html>
