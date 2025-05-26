@@ -28,20 +28,26 @@
             box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
         }
 
-        .detail-transition {
+        /* Classes for page transitions */
+        /* page-hidden ensures the element is completely out of the layout flow */
+        .page-hidden {
+            display: none;
+        }
+
+        /* page-transition-out for elements transitioning out (fading and moving) */
+        .page-transition-out {
+            opacity: 0;
+            transform: translateY(20px);
+            pointer-events: none; /* Allow clicks to pass through during transition */
             transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
         }
 
-        .hidden-opacity {
-            opacity: 0;
-            transform: translateY(20px);
-            pointer-events: none;
-        }
-
-        .visible-opacity {
+        /* page-transition-in for elements transitioning in (fading and moving) */
+        .page-transition-in {
             opacity: 1;
             transform: translateY(0);
             pointer-events: all;
+            transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
         }
 
         .fullscreen-modal-transition {
@@ -61,6 +67,11 @@
 </head>
 <body class="bg-gradient-to-br from-pink-100 to-purple-100 min-h-screen flex flex-col items-center justify-center p-4">
 
+    <audio id="background-music" autoplay loop volume="0.5">
+        <source src="https://www.w3schools.com/html/horse.mp3" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
+
     <header class="text-center mb-12 mt-8">
         <h1 class="text-5xl md:text-6xl font-extrabold text-pink-700 drop-shadow-lg animate-pulse">
             Kenangan Romantis Kita
@@ -70,10 +81,10 @@
         </p>
     </header>
 
-    <div id="memory-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 p-8 w-full max-w-6xl transition-all duration-500 ease-in-out visible-opacity">
+    <div id="memory-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 p-8 w-full max-w-6xl page-transition-in">
         </div>
 
-    <div id="memory-detail" class="fixed inset-0 bg-white bg-opacity-95 backdrop-blur-sm p-8 z-40 overflow-y-auto hidden-opacity detail-transition flex flex-col items-center pt-20">
+    <div id="memory-detail" class="fixed inset-0 bg-white bg-opacity-95 backdrop-blur-sm p-8 z-40 overflow-y-auto page-transition-out page-hidden flex flex-col items-center pt-20">
         <div class="w-full max-w-4xl">
             <button id="back-button" class="mb-8 bg-pink-500 hover:bg-pink-600 text-white font-bold py-3 px-6 rounded-full transition duration-300 ease-in-out transform hover:scale-105 shadow-md">
                 &larr; Kembali
@@ -243,31 +254,46 @@
                 detailGallery.appendChild(galleryItem);
             });
 
-            // Sembunyikan grid kenangan dengan animasi
-            memoryGrid.classList.remove('visible-opacity');
-            memoryGrid.classList.add('hidden-opacity');
+            // Make sure the detail page is not hidden by `display: none` before starting the transition
+            memoryDetail.classList.remove('page-hidden');
+            // Force reflow to ensure the browser applies 'display: block' before starting opacity transition
+            void memoryDetail.offsetWidth;
+
+            // Transition out for the memory grid
+            memoryGrid.classList.remove('page-transition-in');
+            memoryGrid.classList.add('page-transition-out');
+
+            // Transition in for the memory detail
+            memoryDetail.classList.remove('page-transition-out');
+            memoryDetail.classList.add('page-transition-in');
+
+            // Hide the grid completely after its transition is finished
             setTimeout(() => {
-                memoryGrid.classList.add('hidden'); // Sembunyikan sepenuhnya setelah animasi
-                // Tampilkan detail kenangan dengan animasi
-                memoryDetail.classList.remove('hidden-opacity');
-                memoryDetail.classList.add('visible-opacity');
-            }, 500); // Sesuaikan dengan durasi transisi CSS
+                memoryGrid.classList.add('page-hidden');
+            }, 500); // Match with CSS transition duration
         }
 
         /**
          * Fungsi untuk kembali ke halaman daftar kenangan.
          */
         function goBackToGrid() {
-            // Sembunyikan detail kenangan dengan animasi
-            memoryDetail.classList.remove('visible-opacity');
-            memoryDetail.classList.add('hidden-opacity');
+            // Make sure the memory grid is not hidden by `display: none` before starting the transition
+            memoryGrid.classList.remove('page-hidden');
+            // Force reflow
+            void memoryGrid.offsetWidth;
+
+            // Transition out for the memory detail
+            memoryDetail.classList.remove('page-transition-in');
+            memoryDetail.classList.add('page-transition-out');
+
+            // Transition in for the memory grid
+            memoryGrid.classList.remove('page-transition-out');
+            memoryGrid.classList.add('page-transition-in');
+
+            // Hide the detail page completely after its transition is finished
             setTimeout(() => {
-                memoryDetail.classList.add('hidden'); // Sembunyikan sepenuhnya setelah animasi
-                // Tampilkan grid kenangan dengan animasi
-                memoryGrid.classList.remove('hidden'); // Tampilkan grid sebelum animasi
-                memoryGrid.classList.remove('hidden-opacity');
-                memoryGrid.classList.add('visible-opacity');
-            }, 500); // Sesuaikan dengan durasi transisi CSS
+                memoryDetail.classList.add('page-hidden');
+            }, 500); // Match with CSS transition duration
         }
 
         /**
@@ -314,6 +340,18 @@
 
         // Inisialisasi: Render grid kenangan saat halaman dimuat
         document.addEventListener('DOMContentLoaded', renderMemoryGrid);
+
+        // Play background music on user interaction (to bypass autoplay policies)
+        // This is a common workaround for browser autoplay restrictions.
+        // The music will try to autoplay, but if blocked, it will play on the first user interaction.
+        document.addEventListener('click', () => {
+            const music = document.getElementById('background-music');
+            if (music.paused) {
+                music.play().catch(error => {
+                    console.log("Autoplay was prevented. User interaction needed to play music.", error);
+                });
+            }
+        }, { once: true }); // Only trigger this listener once
     </script>
 </body>
 </html>
